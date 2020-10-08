@@ -2,39 +2,39 @@
 
 /* параметри для gulp-autoprefixer */
 var autoprefixerList = [
-  'Chrome >= 45',
-	'Firefox ESR',
-	'Edge >= 12',
-	'Explorer >= 10',
-	'iOS >= 9',
-	'Safari >= 9',
-	'Android >= 4.4',
-	'Opera >= 30'
+    'Chrome >= 45',
+    'Firefox ESR',
+    'Edge >= 12',
+    'Explorer >= 10',
+    'iOS >= 9',
+    'Safari >= 9',
+    'Android >= 4.4',
+    'Opera >= 30'
 ];
 /* шляхи до ісходних файлів (src), до готовим файлам (build), а також до тих за змінами яких треба дивитися (watch)*/
 var path = {
     build: {
-        html:   'assets/build/',
-        js:     'assets/build/js/',
-        css:    'assets/build/css/',
-        img:    'assets/build/img/',
-        fonts:  'assets/build/fonts/'
+        html: 'assets/build/',
+        js: 'assets/build/js/',
+        css: 'assets/build/css/',
+        img: 'assets/build/img/',
+        fonts: 'assets/build/fonts/'
     },
     src: {
-        html:   'assets/src/*.html',
-        js:     'assets/src/js/*.js',
-        style:  'assets/src/style/style.scss',
-        img:    'assets/src/img/**/*.*',
-        fonts:  'assets/src/fonts/**/*.*'
+        html: 'assets/src/*.html',
+        js: 'assets/src/js/*.js',
+        style: 'assets/src/style/style.scss',
+        img: 'assets/src/img/**/*.*',
+        fonts: 'assets/src/fonts/**/*.*'
     },
     watch: {
-        html:  'assets/src/**/*.html',
-        js:    'assets/src/js/**/*.js',
-        css:   'assets/src/style/**/*.scss',
-        img:   'assets/src/img/**/*.*',
+        html: 'assets/src/**/*.html',
+        js: 'assets/src/js/**/*.js',
+        css: 'assets/src/style/**/*.scss',
+        img: 'assets/src/img/**/*.*',
         fonts: 'assets/srs/fonts/**/*.*'
     },
-    clean:     './assets/build'
+    clean: './assets/build'
 };
 /* настройки сервера */
 var config = {
@@ -50,7 +50,7 @@ var gulp = require('gulp'),  // підключення Gulp
     plumber = require('gulp-plumber'), // модуль для відслідковування помилок
     rigger = require('gulp-rigger'), // модуль для імпорта даних одного файла в другий
     sass = require('gulp-sass'), // модуль для компіляції SASS (SCSS) в CSS
-    autoprefixer = require('gulp-autoprefixer'), // модуль для автопрефіксів
+    autoprefixer = require('gulp-autoprefixer'), // модуль для автопрефіксів
     cleanCSS = require('gulp-clean-css'), // плагін для мініфікації CSS
     uglify = require('gulp-uglify'), // модуль для мініфікації JavaScript
     cache = require('gulp-cache'), // модуль для кешування
@@ -73,7 +73,7 @@ gulp.task('html:build', function () {
         .pipe(plumber())
         .pipe(rigger())
         .pipe(gulp.dest(path.build.html))
-        .pipe(webserver.reload({stream: true}));
+        .pipe(webserver.reload({ stream: true }));
 });
 
 // збірка стилів
@@ -82,13 +82,14 @@ gulp.task('css:build', function () {
         .pipe(plumber())
         .pipe(sass())
         .pipe(autoprefixer({
-            browsers: autoprefixerList
+            overrideBrowserslist:  ['last 2 versions'],
+            cascade: false
         }))
         .pipe(gulp.dest(path.build.css))
-        .pipe(rename({suffix: '.min'}))               
+        .pipe(rename({ suffix: '.min' }))
         .pipe(cleanCSS())
         .pipe(gulp.dest(path.build.css))
-        .pipe(webserver.reload({stream: true}));
+        .pipe(webserver.reload({ stream: true }));
 });
 
 // збірка js
@@ -97,14 +98,14 @@ gulp.task('js:build', function () {
         .pipe(plumber())
         .pipe(rigger())
         .pipe(gulp.dest(path.build.js))
-        .pipe(rename({suffix: '.min'}))
+        .pipe(rename({ suffix: '.min' }))
         .pipe(uglify())
         .pipe(gulp.dest(path.build.js))
-        .pipe(webserver.reload({stream: true}));
+        .pipe(webserver.reload({ stream: true }));
 });
 
 // перенос шрифтів
-gulp.task('fonts:build', function() {
+gulp.task('fonts:build', function () {
     return gulp.src(path.src.fonts)
         .pipe(gulp.dest(path.build.fonts));
 });
@@ -113,15 +114,15 @@ gulp.task('fonts:build', function() {
 gulp.task('image:build', function () {
     return gulp.src(path.src.img)
         .pipe(cache(imagemin([
-		    imagemin.gifsicle({interlaced: true}),
+            imagemin.gifsicle({ interlaced: true }),
             jpegrecompress({
                 progressive: true,
                 max: 90,
                 min: 80
             }),
             pngquant(),
-            imagemin.svgo({plugins: [{removeViewBox: false}]})
-		])))
+            imagemin.svgo({ plugins: [{ removeViewBox: false }] })
+        ])))
         .pipe(gulp.dest(path.build.img));
 });
 
@@ -132,32 +133,28 @@ gulp.task('clean:build', function () {
 
 // очистка кешу
 gulp.task('cache:clear', function () {
-  cache.clearAll();
+    cache.clearAll();
 });
 
 // збірка
-gulp.task('build', [
-    'clean:build',
-	'html:build',
+gulp.task('build', gulp.parallel('clean:build',
+    'html:build',
     'css:build',
     'js:build',
     'fonts:build',
-    'image:build'
-]);
+    'image:build'));
 
 // запуск завдань при зміні файлів
-gulp.task('watch', function() {
-    gulp.watch(path.watch.html, ['html:build']);
-    gulp.watch(path.watch.css, ['css:build']);
-    gulp.watch(path.watch.js, ['js:build']);
-    gulp.watch(path.watch.img, ['image:build']);
-    gulp.watch(path.watch.fonts, ['fonts:build']);
+gulp.task('watch', function () {
+    gulp.watch(path.watch.html, gulp.parallel('html:build'));
+    gulp.watch(path.watch.css, gulp.parallel('css:build'));
+    gulp.watch(path.watch.js, gulp.parallel('js:build'));
+    gulp.watch(path.watch.img, gulp.parallel('image:build'));
+    gulp.watch(path.watch.fonts, gulp.parallel('fonts:build'));
 });
 
 // завдання за замовчуванням
-gulp.task('default', [
-    'clean:build',
+gulp.task('default', gulp.parallel('clean:build',
     'build',
     'webserver',
-    'watch'
-]);
+    'watch'));

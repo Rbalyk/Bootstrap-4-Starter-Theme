@@ -35,7 +35,23 @@
 @import "../../../node_modules/bootstrap/scss/_utilities";
 
 // Підключення своїх SCSS файлів
-@import "general";
-@import "header";
+@import "variables";
 @import "footer";
 @import "fonts";
+@import "nav";
+
+
+body {
+    background-color: $white;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+a,
+button {
+    cursor: pointer;
+}

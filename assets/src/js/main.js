@@ -1,5 +1,3 @@
-$(document).ready(function () {
-
-    console.log('Welcome to Bootstrap4')
-
-});
+$(document).ready(function (){
+    console.log('red')
+})
